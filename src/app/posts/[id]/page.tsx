@@ -1,13 +1,18 @@
 import { Suspense } from 'react'
 import Loading from '@/app/loading'
 import PostContent from './PostContent'
+import { Metadata } from 'next'
 
-export default async function PostPage({ params }: { params: { id: string } }) {
-    const { id } = params
+export async function generateMetadata(): Promise<Metadata> {
+    return {
+        title: 'Блог | Ваши посты',
+    }
+}
 
+export default function PostPage() {
     return (
         <Suspense fallback={<Loading />}>
-            <PostContent id={id} />
+            <PostContent />
         </Suspense>
     )
 }

@@ -1,9 +1,20 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
+import { useParams } from 'next/navigation'
 import { getPostById, getCommentsByPostId, addComment } from '@/lib/posts'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+
+export default function PostContent() {
+    const params = useParams()
+    const id = params.id as string
+
+    const [post, setPost] = useState<Post | null>(null)
+    const [comments, setComments] = useState<Comment[]>([])
+    const [loading, setLoading] = useState(true)
+    const { data: session } = useSession()
+    const router = useRouter()
 
 interface Post {
     id: string
@@ -19,14 +30,8 @@ interface Comment {
     author: string
 }
 
-export default function PostContent({ id }: { id: string }) {
-    const [post, setPost] = useState<Post | null>(null)
-    const [comments, setComments] = useState<Comment[]>([])
-    const [loading, setLoading] = useState(true)
-    const { data: session } = useSession()
-    const router = useRouter()
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         const [postData, commentsData] = await Promise.all([
             getPostById(id),
             getCommentsByPostId(id)
@@ -34,11 +39,11 @@ export default function PostContent({ id }: { id: string }) {
         setPost(postData || null)
         setComments(commentsData)
         setLoading(false)
-    }
+    }, [id])
 
     useEffect(() => {
         fetchData()
-    }, [id])
+    }, [fetchData])
 
     const handleAddComment = async (text: string) => {
         if (!session?.user?.name) return
@@ -121,7 +126,7 @@ export default function PostContent({ id }: { id: string }) {
   />
     <button
         type="submit"
-        className="mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+        className="mt-3 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
     >
         Отправить
     </button>
